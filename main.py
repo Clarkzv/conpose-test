@@ -1,56 +1,81 @@
-from midiutil.MidiFile import MIDIFile
+import mido
+import time
 
-def add_chord(track, time, duration, chord_notes):
-    for note in chord_notes:
-        track.addNote(0, 0, note, time, duration, 100)
+# Define the chords and their durations (in seconds)
+chords = [
+    ("Em", 1),
+    ("Cmaj7", 1),
+    ("G", 1),
+    ("D/F#", 1),
+    ("Em", 1),
+    ("Cmaj7", 1),
+    ("G", 1),
+    ("D", 1),
+    ("Am", 1),
+    ("G", 1),
+    ("D", 1),
+    ("Em", 1),
+    ("Cmaj7", 1),
+    ("G", 1),
+    ("D/F#", 1),
+    ("Am", 1),
+    ("G", 1),
+    ("D", 1),
+    ("Em", 1),
+    ("Cmaj7", 1),
+    ("G", 1),
+    ("D/F#", 1),
+    ("Am", 1),
+    ("G", 1),
+    ("D", 1),
+    ("Em", 1),
+    ("Cmaj7", 1),
+    ("G", 1),
+    ("D", 1),
+    ("Em", 1),
+    ("Cmaj7", 1),
+    ("G", 1),
+    ("D/F#", 1),
+    ("Em", 1),
+    ("Cmaj7", 1),
+    ("G", 1),
+    ("D/F#", 1),
+    ("Em", 1),
+    ("Cmaj7", 1),
+    ("G", 1),
+    ("D", 1),
+    ("Am", 1),
+    ("G", 1),
+    ("D", 1),
+    ("Em", 1),
+]
 
-# Chords for the song
-verse1_chords = [['E', 'G', 'B', 'D'], ['E', 'G', 'B', 'D'], ['A', 'C', 'E', 'G'],
-                 ['E', 'G', 'B', 'D'], ['A', 'C', 'E', 'G']]
+# Define the piano notes for each chord
+piano_notes = {
+    "Cmaj7": ["C4", "E4", "G4", "B4"],
+    "Em": ["E3", "G3", "B3", "E4"],
+    "G": ["G3", "B3", "D4", "G4"],
+    "D/F#": ["D3", "F#3", "A3", "D4"],
+}
 
-chorus_chords = [['C', 'E', 'G', 'B'], ['C', 'E', 'G', 'B'], ['C', 'E', 'G', 'B'],
-                 ['A', 'C', 'E', 'G']]
+# Function to create a chord MIDI messages
+def create_chord(chord_name, duration):
+    notes = piano_notes[chord_name]
+    note_msgs = [mido.Message('note_on', note=mido.note_name_to_number(note), velocity=64) for note in notes]
+    chord_end = mido.Message('note_off', note=mido.note_name_to_number(notes[0]), velocity=0, time=int(duration * 1000))
+    return note_msgs + [chord_end]
 
-verse2_chords = [['E', 'G', 'B', 'D'], ['A', 'C', 'E', 'G'],
-                 ['E', 'G', 'B', 'D'], ['A', 'C', 'E', 'G']]
+# Create a MIDI file for the entire song
+mid = mido.MidiFile()
+track = mido.MidiTrack()
+mid.tracks.append(track)
+for chord, duration in chords:
+    chord_msgs = create_chord(chord, duration)
+    for msg in chord_msgs:
+        track.append(msg)
 
-bridge_chords = [['A', 'C', 'E', 'G'], ['C', 'E', 'G', 'B'],
-                 ['A', 'C', 'E', 'G'], ['C', 'E', 'G', 'B']]
+# Export the MIDI file
+midi_filename = "your_song.mid"
+mid.save(midi_filename)
 
-outro_chords = [['E', 'G', 'B', 'D'], ['E', 'G', 'B', 'D'],
-                ['E', 'G', 'B', 'D'], ['E', 'G', 'B', 'D']]
-
-# Create MIDI file and tracks
-midi = MIDIFile(1)
-track = 0
-time = 0
-duration = 1  # Duration in beats for each chord
-
-# Add chords to the tracks
-for chord in verse1_chords:
-    add_chord(midi, track, time, duration, chord)
-    time += duration
-
-for chord in chorus_chords:
-    add_chord(midi, track, time, duration, chord)
-    time += duration
-
-for chord in verse2_chords:
-    add_chord(midi, track, time, duration, chord)
-    time += duration
-
-for chord in bridge_chords:
-    add_chord(midi, track, time, duration, chord)
-    time += duration
-
-for chord in chorus_chords:
-    add_chord(midi, track, time, duration, chord)
-    time += duration
-
-for chord in outro_chords:
-    add_chord(midi, track, time, duration, chord)
-    time += duration
-
-# Save the MIDI file
-with open("generated_song.mid", "wb") as output_file:
-    midi.writeFile(output_file)
+print(f"MIDI file '{midi_filename}' created. You can use MIDI-compatible software to listen or further edit the song.")
