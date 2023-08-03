@@ -68,7 +68,10 @@ def note_to_number(note):
 
 # Function to create a chord MIDI messages
 def create_chord(chord_name, duration):
-    notes = piano_notes[chord_name]
+    notes = piano_notes.get(chord_name)
+    if not notes:
+        raise ValueError(f"Invalid chord name: {chord_name}")
+    
     note_msgs = [mido.Message('note_on', note=note_to_number(note), velocity=64) for note in notes]
     chord_end = mido.Message('note_off', note=note_to_number(notes[0]), velocity=0, time=int(duration * 1000))
     return note_msgs + [chord_end]
